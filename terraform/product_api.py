@@ -12,10 +12,11 @@ dynamodb_endpoint = os.environ.get('DYNAMODB_ENDPOINT', 'http://localhost:4566')
 dynamodb = boto3.client('dynamodb', endpoint_url=dynamodb_endpoint, region_name='eu-west-3')
 TABLE_NAME = 'products-catalog'
 
-# SNS client for notifications
-sns_endpoint = os.environ.get('DYNAMODB_ENDPOINT', 'http://localhost:4566')  # Use same endpoint as DynamoDB
-sns = boto3.client('sns', endpoint_url=sns_endpoint, region_name='eu-west-3')
-SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN', '')
+# SES client for email notifications
+ses_endpoint = os.environ.get('DYNAMODB_ENDPOINT', 'http://localhost:4566')  # Use same endpoint as DynamoDB
+ses = boto3.client('ses', endpoint_url=ses_endpoint, region_name='eu-west-3')
+SES_EMAIL_FROM = os.environ.get('SES_EMAIL_FROM', '')
+SES_EMAIL_TO = os.environ.get('SES_EMAIL_TO', '')
 
 class DecimalEncoder(json.JSONEncoder):
     """Helper class to convert DynamoDB Decimal types to float for JSON serialization"""
@@ -31,34 +32,50 @@ def parse_body(body):
     return body
 
 def send_notification(product_id, product_name, action="created"):
-    """Send SNS notification when product is created"""
-    if not SNS_TOPIC_ARN:
-        logger.warning("SNS_TOPIC_ARN not configured. Skipping notification.")
+    """Send SES email notification when product is created"""
+    if not SES_EMAIL_FROM or not SES_EMAIL_TO:
+        logger.warning("SES email addresses not configured. Skipping notification.")
         return
     
     try:
         message = f"""
-Product {action.upper()}!
-
-Product ID: {product_id}
-Product Name: {product_name}
-Timestamp: {json.dumps(product_id)}
-
-This is an automated notification from Projet1 Serverless Backend.
+<html>
+<body>
+<h2>Product {action.upper()}!</h2>
+<p><strong>Product ID:</strong> {product_id}</p>
+<p><strong>Product Name:</strong> {product_name}</p>
+<p><strong>Timestamp:</strong> {json.dumps(product_id)}</p>
+<hr/>
+<p>This is an automated notification from Projet1 Serverless Backend.</p>
+</body>
+</html>
         """.strip()
         
         subject = f"Product {action.capitalize()}: {product_name}"
         
-        response = sns.publish(
-            TopicArn=SNS_TOPIC_ARN,
-            Subject=subject,
-            Message=message
+        response = ses.send_email(
+            Source=SES_EMAIL_FROM,
+            Destination={
+                'ToAddresses': [SES_EMAIL_TO]
+            },
+            Message={
+                'Subject': {
+                    'Data': subject,
+                    'Charset': 'UTF-8'
+                },
+                'Body': {
+                    'Html': {
+                        'Data': message,
+                        'Charset': 'UTF-8'
+                    }
+                }
+            }
         )
         
-        logger.info(f"Notification sent for product {product_id}. MessageId: {response.get('MessageId')}")
+        logger.info(f"Email notification sent for product {product_id}. MessageId: {response.get('MessageId')}")
         return response
     except Exception as e:
-        logger.error(f"Error sending SNS notification: {str(e)}")
+        logger.error(f"Error sending SES email: {str(e)}")
         # Don't fail the request if notification fails
         return None
 

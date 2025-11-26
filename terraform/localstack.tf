@@ -15,6 +15,7 @@ provider "aws" {
     cloudfront = "http://localhost:4566"
     sts        = "http://localhost:4566"
     sns        = "http://localhost:4566"
+    ses        = "http://localhost:4566"
   }
 
   # Skip AWS account ID validation for LocalStack

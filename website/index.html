@@ -379,7 +379,7 @@ Client Request
 
     <script>
         // API Gateway endpoint - Update this to match your deployment
-        const API_ENDPOINT = 'http://localhost:4566/restapis/5a76uzfkwj/development/_user_request_';
+        const API_ENDPOINT = '';
         
         // Load products from DynamoDB via API Gateway
         async function loadProducts() {
@@ -454,7 +454,7 @@ Client Request
                     <p style="font-size: 1.1em;">No products found in DynamoDB yet.</p>
                     <p style="margin-top: 10px; font-size: 0.9em;">Use the API to add products:</p>
                     <code style="background: #f0f0f0; padding: 10px; border-radius: 3px; display: inline-block; margin-top: 10px;">
-                        curl -X PUT http://localhost:4566/restapis/5a76uzfkwj/development/_user_request_/products \<br/>
+                        curl -X PUT http://localhost:4566/restapis/7hz2npsel6/development/_user_request_/products \<br/>
                         -H "Content-Type: application/json" \<br/>
                         -d '{"product_id":"PROD-001","name":"Product Name","price":99.99,"stock":10}'
                     </code>

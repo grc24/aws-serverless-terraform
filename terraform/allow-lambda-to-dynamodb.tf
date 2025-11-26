@@ -44,9 +44,10 @@ resource "aws_iam_role_policy" "lambda_dynamodb_policy" {
       {
         Effect = "Allow"
         Action = [
-          "sns:Publish"
+          "ses:SendEmail",
+          "ses:SendRawEmail"
         ]
-        Resource = aws_sns_topic.product_notifications.arn
+        Resource = "*"
       },
       {
         Effect = "Allow"

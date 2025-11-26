@@ -24,6 +24,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "app" {
       sse_algorithm = "AES256"
     }
   }
+  
 }
 
 # Configure public access for website hosting

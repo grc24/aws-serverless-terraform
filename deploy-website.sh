@@ -25,6 +25,19 @@ fi
 
 echo -e "${GREEN}✓ Bucket found${NC}\n"
 
+# Update apigateway link in the website files
+API_REST_API_ID=$(aws apigateway get-rest-apis --endpoint-url="$ENDPOINT_URL" --query "items[?name=='projet1-serverless-api'].id" --output text)
+if [ -z "$API_REST_API_ID" ]; then
+    echo -e "${RED}Error: API Gateway 'projet1-serverless-api' not found${NC}"
+    exit 1
+fi
+
+API_URL="http://localhost:4566/restapis/$API_REST_API_ID/development/_user_request_" # Replace with actual API Gateway URL
+echo -e "${YELLOW}Updating API Gateway URL in website files...${NC}"
+sed -i.bak "s|const API_ENDPOINT = '';|const API_ENDPOINT = '$API_URL';|g" "$WEBSITE_DIR/index.html"
+rm "$WEBSITE_DIR/index.html.bak"
+echo -e "${GREEN}✓ API Gateway URL updated to $API_URL${NC}\n"
+
 # Upload files
 echo -e "${YELLOW}Uploading website files...${NC}"
 aws s3 sync "$WEBSITE_DIR" "s3://$BUCKET_NAME" \
@@ -61,3 +74,7 @@ echo "http://localhost:4566/$BUCKET_NAME/index.html"
 echo ""
 echo -e "${YELLOW}Files Uploaded:${NC}"
 aws s3 ls "s3://$BUCKET_NAME" --endpoint-url="$ENDPOINT_URL" --recursive | awk '{print "  - " $4}'
+
+# Restore original website files
+sed -i.bak "s|const API_ENDPOINT = '$API_URL';|const API_ENDPOINT = '';|g" "$WEBSITE_DIR/index.html"
+rm "$WEBSITE_DIR/index.html.bak"

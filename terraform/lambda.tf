@@ -11,8 +11,9 @@ resource "aws_lambda_function" "product_manager" {
 
   environment {
     variables = {
-      DYNAMODB_ENDPOINT = "http://localstack:4566"
-      SNS_TOPIC_ARN     = aws_sns_topic.product_notifications.arn
+      DYNAMODB_ENDPOINT      = "http://localstack:4566"
+      SES_EMAIL_FROM         = var.notification_email
+      SES_EMAIL_TO           = var.notification_email
     }
   }
 

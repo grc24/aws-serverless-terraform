@@ -18,26 +18,6 @@ output "s3_bucket_regional_domain_name" {
   value       = aws_s3_bucket.app.bucket_regional_domain_name
 }
 
-# output "cloudfront_domain_name" {
-#   description = "CloudFront distribution domain name for CDN access"
-#   value       = aws_cloudfront_distribution.s3_distribution.domain_name
-# }
-
-# output "cloudfront_distribution_id" {
-#   description = "CloudFront distribution ID for cache invalidation"
-#   value       = aws_cloudfront_distribution.s3_distribution.id
-# }
-
-# output "origin_access_identity_arn" {
-#   description = "CloudFront Origin Access Identity ARN"
-#   value       = aws_cloudfront_origin_access_identity.oai.iam_arn
-# }
-
-# output "website_access_url" {
-#   description = "URL to access the website"
-#   value       = "https://${aws_cloudfront_distribution.s3_distribution.domain_name}"
-# }
-
 output "api_endpoint" {
   description = "API Gateway endpoint URL"
   value       = "https://${aws_api_gateway_rest_api.product_api.id}.execute-api.${var.aws_region}.amazonaws.com/${aws_api_gateway_stage.api_stage.stage_name}"
@@ -68,14 +48,17 @@ output "api_rest_api_id" {
   value       = aws_api_gateway_rest_api.product_api.id
 }
 
-
-# Output the SNS Topic ARN for Lambda to use
-output "sns_topic_arn" {
-  description = "SNS Topic ARN for product notifications"
-  value       = aws_sns_topic.product_notifications.arn
+output "notification_email" {
+  description = "Email address for SES notifications"
+  value       = var.notification_email
 }
 
-output "notification_email" {
-  description = "Email address subscribed to notifications"
-  value       = var.notification_email
+output "lambda_function_name" {
+  description = "Lambda function name"
+  value       = aws_lambda_function.product_manager.function_name
+}
+
+output "dynamodb_table_name" {
+  description = "DynamoDB table name"
+  value       = aws_dynamodb_table.products.name
 }
